@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Крестики-Нолики</title>
+    <style>
+        body {
+            font-family: Arial;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 700px;
+            margin: 0px;
+            background-color: #d4f8ec;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns:100px 100px 100px;
+            grid-template-rows: 100px 100px 100px;
+            gap: 10px;
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #000;
+            border-radius: 10px;
+            font-size: 32px;
+            font-weight: bold;
+            background-color: #ffffff;
+        }
+
+        .cell:hover {
+            background-color: #d3e9ff;
+        }
+
+        .cell.taken {
+            background-color: #e0e0e0;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00a592;
+            color: white;
+        }
+
+        button:hover {
+            background-color: #005249;
+        }
+        a {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            background-color: #00a592;
+            color: white;
+        }
+
+        a:hover {
+            background-color: #005249;
+        }
+    </style>
+</head>
+<body>
+    <h1>Крестики-Нолики</h1>
+    <div class="scoreboard" id="scoreboard">
+        Игрок X: 0 | Игрок O: 0 | Ничьи: 0
+    </div>
+    <div class="board" id="board"></div>
+    <div class="controls">
+        <button id="reset">Сбросить игру</button>
+        <a href="documentation.pdf" target="_blank">Документация</a>
+    </div>
+
+    <script>
+        const boardElement = document.getElementById('board');
+        const resetButton = document.getElementById('reset');
+        const scoreboardElement = document.getElementById('scoreboard');
+        let board = Array(9).fill(null);
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let scores = { X: 0, O: 0, draws: 0 };
+
+        function drawBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((value, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                if (value) {
+                    cell.textContent = value;
+                    cell.classList.add('taken');
+                }
+                cell.addEventListener('click', () => handleMove(index));
+                boardElement.appendChild(cell);
+            });
+        }
+
+        function handleMove(index) {
+            if (!gameActive || board[index]) return;
+
+            board[index] = currentPlayer;
+            checkWinner();
+
+            if (currentPlayer == 'X') {
+                currentPlayer = 'O';
+            } else {
+                currentPlayer = 'X';
+            }
+            
+            drawBoard();
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] 
+                ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] == board[b] && board[a] == board[c]) {
+                    console.log('Игрок ' + board[a] + ' выиграл');
+                    alert('Игрок ' + board[a] + ' выиграл');
+                    scores[board[a]]++;
+                    gameActive = false;
+                    updateScoreboard();
+                    return;
+                }
+            }
+
+            if (!board.includes(null)) {
+                alert('Ничья!');
+                console.log('Ничья!');
+                scores.draws++;     
+                updateScoreboard();
+                gameActive = false;
+            }
+        }
+
+        function resetGame() {
+            board = Array(9).fill(null);
+            currentPlayer = 'X';
+            gameActive = true;
+            drawBoard();
+        }
+        function updateScoreboard() {
+            scoreboardElement.textContent = 'Игрок X: ' + scores.X + ' | Игрок O: ' + scores.O  +' | Ничьи: ' + scores.draws;
+        }
+        resetButton.addEventListener('click', resetGame);
+        drawBoard();
+    </script>
+</body>
+</html>
